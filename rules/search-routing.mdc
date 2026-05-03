@@ -1,0 +1,47 @@
+---
+description: Search routing rules - directs queries to the optimal search tool
+alwaysApply: true
+---
+
+# Search Routing Rules
+
+These rules activate automatically on natural language search queries — no command needed. When a user's message contains a search intent, route to the appropriate skill or tool.
+
+## Search Routing
+
+1. **Library/Framework/API documentation** → Invoke `web-search-toolkit:search` skill (Context7)
+   - Triggers: "文档", "API", "怎么用", "如何使用", "how to", "usage", "docs", library names with usage questions
+   - Examples: "React useEffect 怎么清理", "Next.js middleware 怎么配置"
+
+2. **GitHub code search** → Invoke `web-search-toolkit:search` skill (gh_grep)
+   - Triggers: "代码", "实现", "示例", "源码", "code", "implementation", "example", find code patterns
+   - Examples: "搜索 GitHub 上的 Next.js middleware 示例", "找一个 React infinite scroll 实现"
+
+3. **Quick factual queries** → Invoke `web-search-toolkit:search` skill (WebSearch)
+   - Triggers: General questions, "搜索", "查找", "search", "look up", "what is"
+   - Examples: "今天天气", "React 19 有什么新特性"
+
+4. **Semantic/AI-powered search** → Invoke `web-search-toolkit:exa-search` command
+   - Triggers: User explicitly wants higher quality results, "exa", "精准搜索", "语义搜索"
+   - Examples: "用 Exa 搜索最新的 AI 工具", "exa 搜索 React 状态管理方案"
+
+5. **Deep research / multi-angle investigation** → Invoke `web-search-toolkit:deep-search` command
+   - Triggers: "深度", "调研", "研究", "全面", "deep dive", "research", "comprehensive"
+   - Examples: "深度调研 2025 AI agent 框架", "全面对比 React 和 Vue 生态"
+
+## Fetch Routing
+
+6. **Known URL (simple)** → Use built-in `WebFetch` directly
+   - Triggers: User pastes a URL, "帮我看看", "总结这个页面"
+   - Examples: "帮我看看 https://example.com/blog-post"
+
+7. **Known URL (complex/multiple)** → Invoke `web-search-toolkit:fetch` command
+   - Triggers: Multiple URLs, heavy JS pages, user requests high quality, SPA content
+   - Examples: "抓取这两个页面 https://a.com https://b.com", "高质量提取这个 SPA 页面"
+
+## Important Notes
+
+- For search types 1-3, invoke the `web-search-toolkit:search` skill — it handles Context7, gh_grep, and WebSearch routing internally.
+- For types 4-5, use the explicit Exa commands for better quality.
+- For fetch, default to WebFetch for simple pages; use the fetch command for complex/multiple URLs.
+- For non-search tasks (coding, debugging, etc.), do not apply these rules.
