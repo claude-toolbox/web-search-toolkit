@@ -3,14 +3,15 @@ name: search
 description: >-
   Unified search router. Activates automatically on any search, lookup, research,
   or documentation query — no command needed, just ask in natural language.
-  Routes to the optimal tool: Context7 for library docs, gh_grep for GitHub code
-  search, Exa for deep research, WebSearch for quick facts, WebFetch for URL
-  extraction. Also callable via /web-search-toolkit:search.
+  Prefers Exa for highest quality results when available; falls back to WebSearch
+  and WebFetch only when Exa is not installed.
 ---
 
 # Unified Search Router
 
 Analyze the user's query, select the optimal search tool, execute, and return formatted results.
+
+**Exa-first strategy:** When the Exa plugin is installed, prefer Exa tools for all web search and content extraction tasks. Context7 and gh_grep are used only for their specialized domains (library docs, code search).
 
 ## Step 1: Determine Search Type
 
@@ -21,10 +22,10 @@ Read the user's query and classify it:
 | **Library docs** | Mentions a library/framework/SDK + usage question ("how to", "怎么用", "API", "配置") | Context7 |
 | **Code search** | "代码", "实现", "示例", "code", "implementation", "example", find code patterns | gh_grep |
 | **Deep research** | "深度", "调研", "研究", "deep dive", "research", "comprehensive", multi-angle topics | Exa |
-| **URL extraction** | User pasted a URL | WebFetch |
-| **Quick fact** | General question, news, facts, "what is", "搜索", "查找" | WebSearch |
+| **URL extraction** | User pasted a URL | Exa (if available) / WebFetch |
+| **Quick fact** | General question, news, facts, "what is", "搜索", "查找" | Exa (if available) / WebSearch |
 
-When ambiguous, prefer the lighter tool (WebSearch) over heavier ones.
+When ambiguous and Exa is available, prefer Exa for quality. When Exa is not available, prefer the lighter tool (WebSearch).
 
 ## Step 2: Execute by Type
 
@@ -91,27 +92,36 @@ Check if the Exa plugin is available by looking for `exa:search` in the skill li
 3. Compile and deduplicate results
 4. Present with sources
 
-### URL Extraction → WebFetch
+### URL Extraction → WebFetch / Exa
 
-**Single URL:** Use the built-in `WebFetch` tool directly.
+User pasted a URL — use WebFetch first (direct, lightweight). If the result is poor (heavy JS, SPA, incomplete content), retry with Exa.
+
+**Single URL:**
 
 ```
 WebFetch(url=<user's URL>, prompt="Extract and summarize the key content")
 ```
 
-**Multiple URLs (2+):** If Exa plugin is available, use `mcp__plugin_exa_exa__web_fetch_exa` for batch fetching — one call handles all URLs, more efficient than parallel WebFetch calls.
+If the result is poor and Exa plugin is available, retry:
+```
+mcp__plugin_exa_exa__web_fetch_exa(urls=[url], maxCharacters=3000)
+```
+
+**Multiple URLs:** If Exa plugin is available, use `mcp__plugin_exa_exa__web_fetch_exa` for batch fetching — one call handles all URLs.
 
 ```
 mcp__plugin_exa_exa__web_fetch_exa(urls=[url1, url2, ...], maxCharacters=3000)
 ```
 
-If Exa is not available, fall back to parallel WebFetch calls.
+If Exa is not available, run parallel `WebFetch` calls.
 
-**Fallback:** If WebFetch fails for a single URL, try `mcp__plugin_exa_exa__web_fetch_exa` if Exa is available.
+### Quick Fact → Exa / WebSearch
 
-### Quick Fact → WebSearch
+Check if the Exa plugin is available by looking for `mcp__plugin_exa_exa__web_search_exa`.
 
-Use the built-in `WebSearch` tool directly.
+**If Exa available (preferred):** Use `mcp__plugin_exa_exa__web_search_exa` for higher quality, semantic search results.
+
+**If Exa not available:** Use the built-in `WebSearch` tool directly.
 
 ```
 WebSearch(query=<refined query>)

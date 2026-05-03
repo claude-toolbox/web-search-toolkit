@@ -6,15 +6,15 @@
 
 <!-- README-I18N:END -->
 
-Unified search toolkit for Claude Code — intelligent routing across multiple search tools for optimal results and token efficiency.
+Unified search toolkit for Claude Code — intelligent routing with Exa-first strategy for highest quality results.
 
 ## Features
 
 - **Natural Language** — Just ask naturally, no command needed. "React useEffect 怎么用" activates Context7 automatically
+- **Exa-First** — When Exa plugin is installed, uses Exa for all web search and content extraction for best quality
 - **Intelligent Routing** — Automatically selects the best search tool based on query type
-- **Token Efficient** — Uses lightweight tools for simple queries, reserves heavy tools for complex research
-- **Graceful Fallback** — If a tool is unavailable, falls back to the next best option
-- **Zero Config** — Works out of the box with built-in tools; optional tools add extra capabilities
+- **Graceful Fallback** — Without Exa, falls back to WebSearch and WebFetch
+- **Zero Config** — Works out of the box with built-in tools; Exa plugin recommended for best experience
 
 ## Usage
 
@@ -23,31 +23,32 @@ No command needed — just ask in natural language:
 - "React useEffect 怎么清理" → Context7 (library docs)
 - "搜索 GitHub 上的 Next.js middleware 示例" → gh_grep (code search)
 - "深度调研 2025 AI agent 框架" → Exa deep research
-- "今天天气怎么样" → WebSearch (quick facts)
-- "帮我看看 https://example.com" → WebFetch (URL extraction)
+- "今天天气怎么样" → Exa search (or WebSearch if Exa not installed)
+- "帮我看看 https://example.com" → Exa fetch (or WebFetch if Exa not installed)
 
 ## Commands
 
-| Command | Description | Tool |
-|---------|-------------|------|
-| `/web-search-toolkit:search` | Smart search with auto routing | Context7 / gh_grep / WebSearch |
-| `/web-search-toolkit:exa-search` | Exa AI semantic search | Exa `web_search_exa` |
-| `/web-search-toolkit:deep-search` | Deep multi-agent research | Exa `exa:search` skill |
-| `/web-search-toolkit:fetch` | Fetch URL content | WebFetch / Exa `web_fetch_exa` |
+| Command | Description | Primary Tool | Fallback |
+|---------|-------------|-------------|----------|
+| `/web-search-toolkit:search` | Smart search with auto routing | Context7 / gh_grep / Exa | WebSearch / WebFetch |
+| `/web-search-toolkit:exa-search` | Semantic search | Exa `web_search_exa` | WebSearch |
+| `/web-search-toolkit:deep-search` | Multi-agent deep research | Exa `exa:search` skill | WebSearch parallel subagents |
+| `/web-search-toolkit:fetch` | Fetch URL content | Exa `web_fetch_exa` | WebFetch |
 
 ### Natural Language Routing
 
 The router classifies your query and picks the optimal tool:
 
-| Query Type | Tool | Example |
-|------------|------|---------|
-| Library/API docs | Context7 CLI | "How to use React useEffect" |
-| GitHub code search | gh_grep MCP | "Find Next.js middleware examples" |
-| Quick facts | WebSearch | "What's new in React 19" |
-| Exa semantic search | Exa `web_search_exa` | "用 Exa 搜索最新 AI 工具" |
-| Deep research | Exa `exa:search` skill | "Comprehensive comparison of AI agents" |
-| Simple URL | WebFetch | "帮我看看这个博客" |
-| Complex/multiple URLs | Exa `web_fetch_exa` | "抓取这两个 SPA 页面" |
+| Query Type | Tool | Fallback | Example |
+|------------|------|----------|---------|
+| Library/API docs | Context7 CLI | WebSearch | "How to use React useEffect" |
+| GitHub code search | gh_grep MCP | WebSearch | "Find Next.js middleware examples" |
+| Quick facts | Exa `web_search_exa` | WebSearch | "What's new in React 19" |
+| Deep research | Exa `exa:search` skill | WebSearch parallel subagents | "Comprehensive comparison of AI agents" |
+| Simple URL | WebFetch | Exa `web_fetch_exa` | "帮我看看这个博客" |
+| Complex/multiple URLs | Exa `web_fetch_exa` | WebFetch | "抓取这两个 SPA 页面" |
+
+**Strategy:** Fuzzy searches (discovery, facts, research) prefer Exa for quality. Known URLs use WebFetch first (direct, lightweight), retry with Exa if content quality is poor.
 
 ## Dependencies
 
@@ -66,20 +67,20 @@ export CONTEXT7_API_KEY=your_key
 ```
 Or login interactively: `npx ctx7@latest login`
 
-### Optional (enhances capabilities)
+### Recommended (best experience)
 
 | Tool | Purpose | Install | Auth |
 |------|---------|---------|------|
-| **Exa plugin** | Deep multi-angle research | `claude install exa@claude-plugins-official` | OAuth or API key |
+| **Exa plugin** | All web search and content extraction | `/plugin install exa@claude-plugins-official` | OAuth or API key |
 
-Without Exa, deep research falls back to parallel WebSearch queries.
+With Exa, all search and fetch tasks use Exa for higher quality results. Without Exa, the toolkit falls back to WebSearch and WebFetch.
 
 ### Built-in (always available)
 
 | Tool | Purpose |
 |------|---------|
-| **WebSearch** | General web search |
-| **WebFetch** | URL content extraction |
+| **WebSearch** | General web search (fallback) |
+| **WebFetch** | URL content extraction (fallback) |
 
 ## Installation
 
@@ -90,7 +91,7 @@ Add the marketplace, then install the plugin:
 /plugin install web-search-toolkit@marketplace
 ```
 
-### Optional: Install Exa for Deep Research
+### Recommended: Install Exa for Best Experience
 
 ```
 /plugin install exa@claude-plugins-official
@@ -122,12 +123,14 @@ web-search-toolkit/
 
 ## Fallback Behavior
 
-Every tool has a fallback path:
-
-- **Context7 fails** → WebSearch with library name + question
-- **gh_grep unavailable** → WebSearch with `site:github.com`
-- **Exa not installed** → WebSearch with parallel subagents
-- **WebFetch fails** → Exa `web_fetch_exa` (if available)
+| Task | Primary | Fallback |
+|------|---------|----------|
+| Quick facts | Exa `web_search_exa` | WebSearch |
+| Simple URL | WebFetch | Exa `web_fetch_exa` |
+| Complex/multiple URLs | Exa `web_fetch_exa` | WebFetch |
+| Deep research | Exa `exa:search` skill | WebSearch parallel subagents |
+| Library docs | Context7 CLI | WebSearch |
+| Code search | gh_grep MCP | WebSearch |
 
 ## License
 
