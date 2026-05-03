@@ -1,0 +1,52 @@
+name: Update Marketplace
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  update-marketplace:
+    runs-on: ubuntu-latest
+    env:
+      PLUGIN_NAME: ${{ github.event.repository.name }}
+    steps:
+      - name: Extract version from tag
+        id: meta
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout marketplace repo
+        uses: actions/checkout@v4
+        with:
+          repository: claude-toolbox/marketplace
+          token: ${{ secrets.MARKETPLACE_TOKEN }}
+          path: marketplace
+
+      - name: Update marketplace.json
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          cd marketplace
+          FILE=".claude-plugin/marketplace.json"
+
+          jq --arg name "$PLUGIN_NAME" \
+             --arg version "$VERSION" \
+             '(.plugins[] | select(.name == $name)) |= (.version = $version)' \
+             "$FILE" > tmp.json && mv tmp.json "$FILE"
+
+          jq --arg name "$PLUGIN_NAME" \
+             '.plugins[] | select(.name == $name) | .version' "$FILE"
+
+      - name: Commit and push
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          cd marketplace
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .claude-plugin/marketplace.json
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "chore: update $PLUGIN_NAME to v$VERSION"
+          git push
