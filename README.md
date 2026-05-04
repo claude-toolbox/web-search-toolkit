@@ -30,6 +30,7 @@ No command needed — just ask in natural language:
 
 | Command | Description | Primary Tool | Fallback |
 |---------|-------------|-------------|----------|
+| `/web-search-toolkit:init` | Install plugin rules into `.claude/rules/` | — | — |
 | `/web-search-toolkit:search` | Smart search with auto routing | Context7 / gh_grep / Exa | WebSearch / WebFetch |
 | `/web-search-toolkit:exa-search` | Semantic search | Exa `web_search_exa` | WebSearch |
 | `/web-search-toolkit:deep-search` | Multi-agent deep research | Exa `exa:search` skill | WebSearch parallel subagents |
@@ -105,12 +106,13 @@ web-search-toolkit/
 │   └── plugin.json              # Plugin manifest
 ├── .mcp.json                    # gh_grep MCP server declaration
 ├── commands/
+│   ├── init.md                  # /init — install rules
 │   ├── search.md                # /search — smart routing
 │   ├── exa-search.md            # /exa-search — Exa semantic search
 │   ├── deep-search.md           # /deep-search — multi-agent research
 │   └── fetch.md                 # /fetch — URL content extraction
-├── rules/
-│   └── search-routing.mdc       # Always-active routing rules
+├── rules-templates/
+│   └── search-routing.md        # Routing rules (installed via /init)
 ├── skills/
 │   └── search/
 │       ├── SKILL.md             # Core routing skill

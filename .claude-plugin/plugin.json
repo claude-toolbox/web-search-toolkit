@@ -1,7 +1,7 @@
 {
   "name": "web-search-toolkit",
   "description": "Unified search toolkit: intelligent routing across WebSearch, Exa, Context7, and gh_grep for optimal results and token efficiency",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "GY"
   }

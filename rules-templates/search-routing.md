@@ -1,8 +1,3 @@
----
-description: Search routing rules - Exa-first strategy for quality results
-alwaysApply: true
----
-
 # Search Routing Rules
 
 These rules activate automatically on natural language search queries — no command needed. When a user's message contains a search intent, route to the appropriate skill or tool.
