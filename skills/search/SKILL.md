@@ -5,6 +5,8 @@ description: >-
   or documentation query — no command needed, just ask in natural language.
   Prefers Exa for highest quality results when available; falls back to WebSearch
   and WebFetch only when Exa is not installed.
+context: fork
+agent: web-search
 ---
 
 # Unified Search Router

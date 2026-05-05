@@ -30,26 +30,10 @@ No command needed — just ask in natural language:
 
 | Command | Description | Primary Tool | Fallback |
 |---------|-------------|-------------|----------|
-| `/web-search-toolkit:init` | Install plugin rules into `.claude/rules/` | — | — |
 | `/web-search-toolkit:search` | Smart search with auto routing | Context7 / gh_grep / Exa | WebSearch / WebFetch |
 | `/web-search-toolkit:exa-search` | Semantic search | Exa `web_search_exa` | WebSearch |
 | `/web-search-toolkit:deep-search` | Multi-agent deep research | Exa `exa:search` skill | WebSearch parallel subagents |
 | `/web-search-toolkit:fetch` | Fetch URL content | Exa `web_fetch_exa` | WebFetch |
-
-### Natural Language Routing
-
-The router classifies your query and picks the optimal tool:
-
-| Query Type | Tool | Fallback | Example |
-|------------|------|----------|---------|
-| Library/API docs | Context7 CLI | WebSearch | "How to use React useEffect" |
-| GitHub code search | gh_grep MCP | WebSearch | "Find Next.js middleware examples" |
-| Quick facts | Exa `web_search_exa` | WebSearch | "What's new in React 19" |
-| Deep research | Exa `exa:search` skill | WebSearch parallel subagents | "Comprehensive comparison of AI agents" |
-| Simple URL | WebFetch | Exa `web_fetch_exa` | "帮我看看这个博客" |
-| Complex/multiple URLs | Exa `web_fetch_exa` | WebFetch | "抓取这两个 SPA 页面" |
-
-**Strategy:** Fuzzy searches (discovery, facts, research) prefer Exa for quality. Known URLs use WebFetch first (direct, lightweight), retry with Exa if content quality is poor.
 
 ## Dependencies
 
@@ -62,77 +46,41 @@ The router classifies your query and picks the optimal tool:
 
 Context7 runs via `npx ctx7@latest` — no global installation required.
 
-**Context7 API Key (optional):** For higher rate limits, set the environment variable before starting Claude Code:
-```bash
-export CONTEXT7_API_KEY=your_key
-```
-Or login interactively: `npx ctx7@latest login`
-
 ### Recommended (best experience)
 
-| Tool | Purpose | Install | Auth |
-|------|---------|---------|------|
-| **Exa plugin** | All web search and content extraction | `/plugin install exa@claude-plugins-official` | OAuth or API key |
-
-With Exa, all search and fetch tasks use Exa for higher quality results. Without Exa, the toolkit falls back to WebSearch and WebFetch.
-
-### Built-in (always available)
-
-| Tool | Purpose |
-|------|---------|
-| **WebSearch** | General web search (fallback) |
-| **WebFetch** | URL content extraction (fallback) |
+| Tool | Purpose | Install |
+|------|---------|---------|
+| **Exa plugin** | All web search and content extraction | `/plugin install exa@claude-plugins-official` |
 
 ## Installation
-
-Add the marketplace, then install the plugin:
 
 ```
 /plugin marketplace add claude-toolbox/marketplace
 /plugin install web-search-toolkit@marketplace
 ```
 
-### Recommended: Install Exa for Best Experience
-
-```
-/plugin install exa@claude-plugins-official
-```
-
 ## Project Structure
 
 ```
 web-search-toolkit/
-├── .claude-plugin/
-│   └── plugin.json              # Plugin manifest
-├── .mcp.json                    # gh_grep MCP server declaration
+├── agents/
+│   └── web-search.md              # Search routing agent (auto-loaded)
 ├── commands/
-│   ├── init.md                  # /init — install rules
-│   ├── search.md                # /search — smart routing
-│   ├── exa-search.md            # /exa-search — Exa semantic search
-│   ├── deep-search.md           # /deep-search — multi-agent research
-│   └── fetch.md                 # /fetch — URL content extraction
-├── rules-templates/
-│   └── search-routing.md        # Routing rules (installed via /init)
+│   ├── search.md                  # /search — smart routing
+│   ├── exa-search.md              # /exa-search — Exa semantic search
+│   ├── deep-search.md             # /deep-search — multi-agent research
+│   └── fetch.md                   # /fetch — URL content extraction
 ├── skills/
 │   └── search/
-│       ├── SKILL.md             # Core routing skill
+│       ├── SKILL.md               # Core routing skill
 │       └── references/
-│           └── routing-guide.md # Detailed decision tree
+│           └── routing-guide.md   # Detailed decision tree
+├── .claude-plugin/plugin.json
+├── .mcp.json
 ├── LICENSE
 ├── README.md
 └── README.zh.md
 ```
-
-## Fallback Behavior
-
-| Task | Primary | Fallback |
-|------|---------|----------|
-| Quick facts | Exa `web_search_exa` | WebSearch |
-| Simple URL | WebFetch | Exa `web_fetch_exa` |
-| Complex/multiple URLs | Exa `web_fetch_exa` | WebFetch |
-| Deep research | Exa `exa:search` skill | WebSearch parallel subagents |
-| Library docs | Context7 CLI | WebSearch |
-| Code search | gh_grep MCP | WebSearch |
 
 ## License
 
